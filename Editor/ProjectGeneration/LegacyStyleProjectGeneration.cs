@@ -37,6 +37,8 @@ namespace Microsoft.Unity.VisualStudio.Editor
 			headerBuilder.Append(@"  <!-- Generated file, do not modify, your changes will be overwritten (use AssetPostprocessor.OnGeneratedCSProject) -->").Append(k_WindowsNewline);
 			headerBuilder.Append(@"  <PropertyGroup>").Append(k_WindowsNewline);
 			headerBuilder.Append(@"    <LangVersion>").Append(properties.LangVersion).Append(@"</LangVersion>").Append(k_WindowsNewline);
+			if (!string.IsNullOrEmpty(properties.Nullable))
+				headerBuilder.Append(@"    <Nullable>").Append(properties.Nullable).Append(@"</Nullable>").Append(k_WindowsNewline);
 			headerBuilder.Append(@"  </PropertyGroup>").Append(k_WindowsNewline);
 			headerBuilder.Append(@"  <PropertyGroup>").Append(k_WindowsNewline);
 			headerBuilder.Append(@"    <Configuration Condition="" '$(Configuration)' == '' "">Debug</Configuration>").Append(k_WindowsNewline);

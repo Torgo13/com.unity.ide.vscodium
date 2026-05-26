@@ -1,5 +1,16 @@
 # Code Editor Package for Visual Studio
 
+## [2.0.28] - 2026-05-26
+
+Project generation:
+
+- Enable `Player` projects when using `SDK-Style` project generation.
+- Allow customization of `nullable` when using a `rsp` file.
+
+Integration:
+
+- Fix Visual Studio Code version detection for installations using the per-commit versioned resources layout.
+
 ## [2.0.27] - 2026-01-20
 
 Integration:

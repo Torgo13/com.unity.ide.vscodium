@@ -5,7 +5,6 @@ namespace Microsoft.Unity.VisualStudio.Editor
 	internal class ProjectProperties
 	{
 		public string ProjectGuid { get; set; } = string.Empty;
-		public string LangVersion { get; set; } = "latest";
 		public string AssemblyName { get; set; } = string.Empty;
 		public string RootNamespace { get; set; } = string.Empty;
 		public string OutputPath { get; set; } = string.Empty;
@@ -18,6 +17,8 @@ namespace Microsoft.Unity.VisualStudio.Editor
 		public string[] AdditionalFilePaths { get; set; } = Array.Empty<string>();
 
 		// RSP alterable
+		public string LangVersion { get; set; } = "latest";
+		public string Nullable { get; set; } = string.Empty;
 		public string[] Defines { get; set; } = Array.Empty<string>();
 		public bool Unsafe { get; set; } = false;
 
