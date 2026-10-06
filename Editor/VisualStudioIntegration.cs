@@ -13,11 +13,14 @@ using Microsoft.Unity.VisualStudio.Editor.Testing;
 using UnityEditor;
 using UnityEngine;
 using MessageType = Microsoft.Unity.VisualStudio.Editor.Messaging.MessageType;
+#if LIFECYCLE_APIS_AVAILABLE
+using Unity.Scripting.LifecycleManagement;
+#endif
 
 namespace Microsoft.Unity.VisualStudio.Editor
 {
 	[InitializeOnLoad]
-	internal class VisualStudioIntegration
+	internal partial class VisualStudioIntegration
 	{
 		class Client
 		{
@@ -55,7 +58,9 @@ namespace Microsoft.Unity.VisualStudio.Editor
 					Debug.LogWarning($"Unable to use UDP port {messagingPort} for VS/Unity messaging. You should check if another process is already bound to this port or if your firewall settings are compatible.");
 				}
 
+#if !LIFECYCLE_APIS_AVAILABLE
 				RunOnShutdown(Shutdown);
+#endif
 			});
 
 			EditorApplication.update += OnUpdate;
@@ -74,12 +79,12 @@ namespace Microsoft.Unity.VisualStudio.Editor
 			EditorApplication.update += callback;
 		}
 
+#if !LIFECYCLE_APIS_AVAILABLE
 		private static void RunOnShutdown(Action action)
 		{
-#pragma warning disable UAC0006
-		AppDomain.CurrentDomain.DomainUnload += (_, __) => action();
-#pragma warning restore UAC0006
+			AppDomain.CurrentDomain.DomainUnload += (_, __) => action();
 		}
+#endif
 
 		private static int DebuggingPort()
 		{
@@ -249,6 +254,9 @@ namespace Microsoft.Unity.VisualStudio.Editor
 			_messager?.SendMessage(targetEndPoint, answerType, answerValue);
 		}
 
+#if LIFECYCLE_APIS_AVAILABLE
+		[OnCodeUnloading]
+#endif
 		private static void Shutdown()
 		{
 			if (_messager == null)

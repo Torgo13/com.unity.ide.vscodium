@@ -115,12 +115,28 @@ namespace Microsoft.Unity.VisualStudio.Editor
 				if (manifestBase == null)
 					return false;
 
-				var manifestFullPath = IOPath.Combine(manifestBase, "resources", "app", "package.json");
-				if (File.Exists(manifestFullPath))
+				foreach (var manifestFullPath in EnumerateCandidateManifests(manifestBase))
 				{
-					var manifest = JsonUtility.FromJson<VisualStudioCodeManifest>(File.ReadAllText(manifestFullPath));
-					Version.TryParse(manifest.version.Split('-').First(), out version);
-					isPrerelease = manifest.version.ToLower().Contains("insider");
+					try
+					{
+						var manifest = JsonUtility.FromJson<VisualStudioCodeManifest>(File.ReadAllText(manifestFullPath));
+						if (manifest == null || string.IsNullOrEmpty(manifest.version))
+							continue;
+
+						if (!Version.TryParse(manifest.version.Split('-').First(), out var candidateVersion))
+							continue;
+
+						// legacy + transient old/new folders during an update are both considered. take the latest version.
+						if (version != null && candidateVersion <= version)
+							continue;
+
+						version = candidateVersion;
+						isPrerelease = manifest.version.ToLower().Contains("insider");
+					}
+					catch (Exception)
+					{
+						// skip unreadable/invalid manifest entries
+					}
 				}
 			}
 			catch (Exception)
@@ -139,6 +155,27 @@ namespace Microsoft.Unity.VisualStudio.Editor
 			};
 
 			return true;
+		}
+
+		// Returns the possible locations of the VS Code `package.json` file.
+		// Historically VS Code stored it at `<install>/resources/app/package.json`.
+		// On Windows, VS Code switched to a per-commit versioned subdirectory
+		private static IEnumerable<string> EnumerateCandidateManifests(string manifestBase)
+		{
+			var legacy = IOPath.Combine(manifestBase, "resources", "app", "package.json");
+			if (File.Exists(legacy))
+				yield return legacy;
+
+			string[] subdirs;
+			try	{ subdirs = Directory.GetDirectories(manifestBase); }
+			catch {	yield break; }
+
+			foreach (var subdir in subdirs)
+			{
+				var candidate = IOPath.Combine(subdir, "resources", "app", "package.json");
+				if (File.Exists(candidate))
+					yield return candidate;
+			}
 		}
 
 		public static IEnumerable<IVisualStudioInstallation> GetVisualStudioInstallations()
