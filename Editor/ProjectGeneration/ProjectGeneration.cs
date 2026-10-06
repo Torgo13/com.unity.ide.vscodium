@@ -595,6 +595,11 @@ namespace Microsoft.Unity.VisualStudio.Editor
 			return Path.Combine(ProjectDirectory.NormalizePathSeparators(), $"{InvalidCharactersRegexPattern.Replace(m_ProjectName, "_")}.sln");
 		}
 
+		internal string GetNullable(ResponseFileData[] responseFileData)
+		{
+			return GetOtherArguments(responseFileData, "nullable").FirstOrDefault() ?? string.Empty;
+		}
+
 		internal string GetLangVersion(Assembly assembly, ResponseFileData[] responseFileData)
 		{
 			var langVersion = GetOtherArguments(responseFileData, "langversion").FirstOrDefault();
@@ -656,11 +661,9 @@ namespace Microsoft.Unity.VisualStudio.Editor
 			var analyzerConfigPath = string.Empty;
 			var compilerOptions = assembly.compilerOptions;
 
-#if UNITY_2020_2_OR_NEWER
 			// Analyzers + ruleset provided by Unity
 			analyzers.AddRange(compilerOptions.RoslynAnalyzerDllPaths);
 			rulesetPath = compilerOptions.RoslynAnalyzerRulesetPath;
-#endif
 
 			// We have support in 2021.3, 2022.2 but without a backport in 2022.1
 #if UNITY_2021_3
@@ -714,6 +717,7 @@ namespace Microsoft.Unity.VisualStudio.Editor
 			{
 				ProjectGuid = ProjectGuid(assembly),
 				LangVersion = GetLangVersion(assembly, responseFileData),
+				Nullable = GetNullable(responseFileData),
 				AssemblyName = assembly.name,
 				RootNamespace = GetRootNamespace(assembly),
 				OutputPath = assembly.outputPath,
@@ -1032,11 +1036,7 @@ namespace Microsoft.Unity.VisualStudio.Editor
 
 		private static string GetRootNamespace(Assembly assembly)
 		{
-#if UNITY_2020_2_OR_NEWER
 			return assembly.rootNamespace;
-#else
-			return EditorSettings.projectGenerationRootNamespace;
-#endif
 		}
 	}
 

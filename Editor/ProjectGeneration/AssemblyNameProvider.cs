@@ -90,10 +90,8 @@ namespace Microsoft.Unity.VisualStudio.Editor
 						assembly.assemblyReferences,
 						assembly.compiledAssemblyReferences,
 						assembly.flags,
-						assembly.compilerOptions
-#if UNITY_2020_2_OR_NEWER
-						, assembly.rootNamespace
-#endif
+						assembly.compilerOptions,
+						assembly.rootNamespace
 					);
 				}
 			}

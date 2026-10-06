@@ -16,15 +16,9 @@ namespace Microsoft.Unity.VisualStudio.Editor
 	{
 		internal override GeneratorStyle Style => GeneratorStyle.SDK;
 
-		internal class SdkStyleAssemblyNameProvider : AssemblyNameProvider
-		{
-			// disable PlayerGeneration with SdkStyle projects
-			internal override ProjectGenerationFlag ProjectGenerationFlagImpl => base.ProjectGenerationFlagImpl & ~ProjectGenerationFlag.PlayerAssemblies;
-		}
-
 		public SdkStyleProjectGeneration() : base(
 			Directory.GetParent(Application.dataPath)?.FullName,
-			new SdkStyleAssemblyNameProvider(),
+			new AssemblyNameProvider(),
 			new FileIOProvider(),
 			new GUIDProvider())
 		{
@@ -73,6 +67,8 @@ namespace Microsoft.Unity.VisualStudio.Editor
 			headerBuilder.Append(@"    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>").Append(k_WindowsNewline);
 			headerBuilder.Append(@"    <EnableDefaultItems>false</EnableDefaultItems>").Append(k_WindowsNewline);
 			headerBuilder.Append(@"    <LangVersion>").Append(properties.LangVersion).Append(@"</LangVersion>").Append(k_WindowsNewline);
+			if (!string.IsNullOrEmpty(properties.Nullable))
+				headerBuilder.Append(@"    <Nullable>").Append(properties.Nullable).Append(@"</Nullable>").Append(k_WindowsNewline);
 			headerBuilder.Append(@"    <RootNamespace>").Append(properties.RootNamespace).Append(@"</RootNamespace>").Append(k_WindowsNewline);
 			headerBuilder.Append(@"    <OutputType>Library</OutputType>").Append(k_WindowsNewline);
 			headerBuilder.Append(@"    <AssemblyName>").Append(properties.AssemblyName).Append(@"</AssemblyName>").Append(k_WindowsNewline);
