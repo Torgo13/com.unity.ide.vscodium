@@ -1,4 +1,4 @@
-﻿using System;
+﻿#if INCLUDE_TEST_FRAMEWORK
 
 using UnityEditor.TestTools.TestRunner.Api;
 
@@ -58,3 +58,4 @@ namespace Microsoft.Unity.VisualStudio.Editor.Testing
 		}
 	}
 }
+#endif // INCLUDE_TEST_FRAMEWORK

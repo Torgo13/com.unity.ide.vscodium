@@ -14,6 +14,11 @@
     "defineConstraints": [],
     "versionDefines": [
         {
+            "name": "com.unity.test-framework",
+            "expression": "",
+            "define": "INCLUDE_TEST_FRAMEWORK"
+        },
+        {
             "name": "Unity",
             "expression": "6000.5.0a9",
             "define": "LIFECYCLE_APIS_AVAILABLE"

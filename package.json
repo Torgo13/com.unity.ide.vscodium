@@ -4,9 +4,6 @@
   "description": "Code editor integration for supporting Visual Studio, Visual Studio Code and VSCodium as code editor for unity. Adds support for generating csproj files for intellisense purposes, auto discovery of installations, etc. Fork of com.unity.ide.visualstudio with VSCodium detection added.",
   "version": "2.0.28",
   "unity": "2021.3",
-  "dependencies": {
-    "com.unity.test-framework": "1.1.33"
-  },
   "_upm": {
     "changelog": "Project generation:\n\n- Enable `Player` projects when using `SDK-Style` project generation.\n- Allow customization of `nullable` when using a `rsp` file.\n\nIntegration:\n\n- Fix Visual Studio Code version detection for installations using the per-commit versioned resources layout."
   },

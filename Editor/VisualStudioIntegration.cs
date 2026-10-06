@@ -170,13 +170,13 @@ namespace Microsoft.Unity.VisualStudio.Editor
 				case MessageType.ProjectPath:
 					Answer(message, MessageType.ProjectPath, FileUtility.GetAbsolutePath(Path.Combine(Application.dataPath, "..")));
 					break;
-				case MessageType.ExecuteTests:
+#if INCLUDE_TEST_FRAMEWORK
 					TestRunnerApiListener.ExecuteTests(message.Value);
 					break;
 				case MessageType.RetrieveTestList:
 					TestRunnerApiListener.RetrieveTestList(message.Value);
 					break;
-				case MessageType.ShowUsage:
+#endif // INCLUDE_TEST_FRAMEWORK
 					UsageUtility.ShowUsage(message.Value);
 					break;
 			}

@@ -1,4 +1,4 @@
-﻿using System;
+﻿#if INCLUDE_TEST_FRAMEWORK
 using System.Collections.Generic;
 using UnityEditor.TestTools.TestRunner.Api;
 using UnityEngine;
@@ -88,3 +88,4 @@ namespace Microsoft.Unity.VisualStudio.Editor.Testing
 		}
 	}
 }
+#endif // INCLUDE_TEST_FRAMEWORK
