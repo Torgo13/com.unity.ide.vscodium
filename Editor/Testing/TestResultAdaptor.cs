@@ -1,4 +1,5 @@
 ﻿#if INCLUDE_TEST_FRAMEWORK
+using System;
 
 using UnityEditor.TestTools.TestRunner.Api;
 
