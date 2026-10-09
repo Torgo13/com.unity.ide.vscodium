@@ -5,7 +5,9 @@
 
 using System;
 using UnityEditor;
+#if !UNITY_MSBUILD_ENABLED
 using UnityEditor.Compilation;
+#endif
 
 namespace Microsoft.Unity.VisualStudio.Editor
 {
@@ -38,6 +40,7 @@ namespace Microsoft.Unity.VisualStudio.Editor
 
 		public static bool IsInSafeMode => _lazyIsInSafeMode.Value;
 
+#if !UNITY_MSBUILD_ENABLED
 		public static Version LatestLanguageVersionSupported(Assembly assembly)
 		{
 			if (assembly?.compilerOptions != null && Version.TryParse(assembly.compilerOptions.LanguageVersion, out var result))
@@ -46,5 +49,6 @@ namespace Microsoft.Unity.VisualStudio.Editor
 			// if parsing fails, we know at least we have support for 8.0
 			return new Version(8, 0);
 		}
+#endif
 	}
 }

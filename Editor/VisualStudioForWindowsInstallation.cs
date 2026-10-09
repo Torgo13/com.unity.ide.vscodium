@@ -23,6 +23,7 @@ namespace Microsoft.Unity.VisualStudio.Editor
 {
 	internal class VisualStudioForWindowsInstallation : VisualStudioInstallation
 	{
+#if !UNITY_MSBUILD_ENABLED
 		// C# language version support for Visual Studio
 		private static readonly VersionPair[] WindowsVersionTable =
 		{
@@ -44,6 +45,7 @@ namespace Microsoft.Unity.VisualStudio.Editor
 			new VersionPair(15,3, /* => */ 7,1),
 			new VersionPair(15,0, /* => */ 7,0),
 		};
+#endif
 
 		private static string _vsWherePath;
 
@@ -55,6 +57,7 @@ namespace Microsoft.Unity.VisualStudio.Editor
 			}
 		}
 
+#if !UNITY_MSBUILD_ENABLED
 		public override Version LatestLanguageVersionSupported
 		{
 			get
@@ -62,6 +65,7 @@ namespace Microsoft.Unity.VisualStudio.Editor
 				return GetLatestLanguageVersionSupported(WindowsVersionTable);
 			}
 		}
+#endif
 
 		private static string ReadRegistry(RegistryKey hive, string keyName, string valueName)
 		{
@@ -121,6 +125,7 @@ namespace Microsoft.Unity.VisualStudio.Editor
 			return Array.Empty<string>();
 		}
 
+#if !UNITY_MSBUILD_ENABLED
 		public override IGenerator ProjectGenerator
 		{
 			get
@@ -128,6 +133,7 @@ namespace Microsoft.Unity.VisualStudio.Editor
 				return GeneratorFactory.GetInstance(Version.Major >= 18 ? GeneratorStyle.SDK : GeneratorStyle.Legacy);
 			}
 		}
+#endif
 
 		private static bool IsCandidateForDiscovery(string path)
 		{

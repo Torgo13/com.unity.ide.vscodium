@@ -13,12 +13,16 @@ namespace Microsoft.Unity.VisualStudio.Editor
 	{
 		string Path { get; }
 		bool SupportsAnalyzers { get; }
-		Version LatestLanguageVersionSupported { get; }
 		string[] GetAnalyzers();
+#if !UNITY_MSBUILD_ENABLED
+		Version LatestLanguageVersionSupported { get; }
+#endif
 		CodeEditor.Installation ToCodeEditorInstallation();
 		bool Open(string path, int line, int column, string solutionPath);
-		IGenerator ProjectGenerator { get; }
 		void CreateExtraFiles(string projectDirectory);
+#if !UNITY_MSBUILD_ENABLED
+		IGenerator ProjectGenerator { get; }
+#endif
 	}
 
 	internal abstract class VisualStudioInstallation : IVisualStudioInstallation
@@ -29,12 +33,15 @@ namespace Microsoft.Unity.VisualStudio.Editor
 		public bool IsPrerelease { get; set; }
 
 		public abstract bool SupportsAnalyzers { get; }
-		public abstract Version LatestLanguageVersionSupported { get; }
 		public abstract string[] GetAnalyzers();
-		public abstract IGenerator ProjectGenerator { get; }
 		public abstract void CreateExtraFiles(string projectDirectory);
+#if !UNITY_MSBUILD_ENABLED
+		public abstract Version LatestLanguageVersionSupported { get; }
+		public abstract IGenerator ProjectGenerator { get; }
+#endif
 		public abstract bool Open(string path, int line, int column, string solutionPath);
 
+#if !UNITY_MSBUILD_ENABLED
 		protected Version GetLatestLanguageVersionSupported(VersionPair[] versions)
 		{
 			if (versions != null)
@@ -49,6 +56,7 @@ namespace Microsoft.Unity.VisualStudio.Editor
 			// default to 7.0
 			return new Version(7, 0);
 		}
+#endif
 
 		protected static string[] GetAnalyzers(string path)
 		{

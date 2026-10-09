@@ -1,5 +1,13 @@
 # Code Editor Package for Visual Studio
 
+## [2.0.29] - 2026-10-09
+
+Integration:
+
+- Delegate project generation to Unity's MSBuild pipeline when `UNITY_MSBUILD_ENABLED` is set, retaining design-time IDE analyzers, user-project capabilities, and editor configuration.
+- Remove stale generated MSBuild integration metadata when returning to regular compilation.
+- Remove the `com.unity.test-framework` dependency. The Test Explorer integration is now compiled only when the Test Framework package is present in the project.
+
 ## [2.0.28] - 2026-05-26
 
 Project generation:

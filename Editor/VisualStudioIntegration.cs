@@ -12,14 +12,17 @@ using Microsoft.Unity.VisualStudio.Editor.Messaging;
 using Microsoft.Unity.VisualStudio.Editor.Testing;
 using UnityEditor;
 using UnityEngine;
-using MessageType = Microsoft.Unity.VisualStudio.Editor.Messaging.MessageType;
 #if LIFECYCLE_APIS_AVAILABLE
 using Unity.Scripting.LifecycleManagement;
 #endif
+using MessageType = Microsoft.Unity.VisualStudio.Editor.Messaging.MessageType;
 
 namespace Microsoft.Unity.VisualStudio.Editor
 {
+#if !LIFECYCLE_APIS_AVAILABLE
 	[InitializeOnLoad]
+#endif
+	// Partial class required by the source generator to use [OnCodeInitializing] and [OnCodeDeinitializing] attributes
 	internal partial class VisualStudioIntegration
 	{
 		class Client
@@ -35,7 +38,12 @@ namespace Microsoft.Unity.VisualStudio.Editor
 		private static readonly object _incomingLock = new object();
 		private static readonly object _clientsLock = new object();
 
+#if LIFECYCLE_APIS_AVAILABLE
+		[OnCodeInitializing]
+		static void Initialize()
+#else
 		static VisualStudioIntegration()
+#endif
 		{
 			if (!VisualStudioEditor.IsEnabled)
 				return;
@@ -65,6 +73,17 @@ namespace Microsoft.Unity.VisualStudio.Editor
 
 			EditorApplication.update += OnUpdate;
 		}
+
+#if LIFECYCLE_APIS_AVAILABLE
+		// AppDomain.DomainUnload is never raised when the AssemblyLoadContext unloads: close the socket here,
+		// otherwise its pending receive keeps the Messager (and the whole ALC) alive
+		[OnCodeDeinitializing]
+		static void Deinitialize()
+		{
+			EditorApplication.update -= OnUpdate;
+			Shutdown();
+		}
+#endif
 
 		private static void RunOnceOnUpdate(Action action)
 		{
@@ -204,7 +223,11 @@ namespace Microsoft.Unity.VisualStudio.Editor
 
 		internal static string PackageVersion()
 		{
+#if UNITY_MSBUILD_ENABLED
+			var package = UnityEditor.PackageManager.PackageInfo.FindForAssetPath("Packages/com.unity.ide.visualstudio");
+#else
 			var package = UnityEditor.PackageManager.PackageInfo.FindForAssembly(typeof(VisualStudioIntegration).Assembly);
+#endif
 			return package.version;
 		}
 

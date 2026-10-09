@@ -67,6 +67,11 @@ namespace Microsoft.Unity.VisualStudio.Editor
 			return relative == Path.GetFileName(relative);
 		}
 
+		internal static bool IsMSBuildGeneratedProject(string path)
+		{
+			return !string.IsNullOrEmpty(path) && path.EndsWith(".gen.csproj", StringComparison.OrdinalIgnoreCase);
+		}
+
 		public static string MakeAbsolutePath(this string path)
 		{
 			if (string.IsNullOrEmpty(path)) { return string.Empty; }

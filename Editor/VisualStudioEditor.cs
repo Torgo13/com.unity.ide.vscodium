@@ -34,6 +34,10 @@ namespace Microsoft.Unity.VisualStudio.Editor
 			if (!UnityInstallation.IsMainUnityEditorProcess)
 				return;
 
+#if !UNITY_MSBUILD_ENABLED
+			MSBuildProjectIntegration.RemoveGeneratedProps();
+#endif
+
 			Discovery.Initialize();
 			CodeEditor.Register(new VisualStudioEditor());
 
@@ -77,6 +81,7 @@ namespace Microsoft.Unity.VisualStudio.Editor
 
 		internal static bool IsEnabled => CodeEditor.CurrentEditor is VisualStudioEditor && UnityInstallation.IsMainUnityEditorProcess;
 
+#if !UNITY_MSBUILD_ENABLED
 		// this one seems legacy and not used anymore
 		// keeping it for now given it is public, so we need a major bump to remove it 
 		public void CreateIfDoesntExist()
@@ -88,9 +93,14 @@ namespace Microsoft.Unity.VisualStudio.Editor
 			if (!generator.HasSolutionBeenGenerated())
 				generator.Sync();
 		}
+#endif
 
 		public void Initialize(string editorInstallationPath)
 		{
+#if UNITY_MSBUILD_ENABLED
+			if (TryGetVisualStudioInstallationForPath(editorInstallationPath, false, out var installation))
+				MSBuildProjectIntegration.Update(installation);
+#endif
 		}
 
 		internal virtual bool TryGetVisualStudioInstallationForPath(string editorPath, bool lookupDiscoveredInstallations, out IVisualStudioInstallation installation)
@@ -116,10 +126,16 @@ namespace Microsoft.Unity.VisualStudio.Editor
 			GUILayout.BeginHorizontal();
 			GUILayout.FlexibleSpace();
 
-			if (!TryGetVisualStudioInstallationForPath(CodeEditor.CurrentEditorInstallation, true, out var installation))
-				return;
-
+#if UNITY_MSBUILD_ENABLED
+			var package = UnityEditor.PackageManager.PackageInfo.FindForAssetPath("Packages/com.unity.ide.visualstudio");
+#else
 			var package = UnityEditor.PackageManager.PackageInfo.FindForAssembly(GetType().Assembly);
+#endif
+			var displayName = package?.displayName ?? "Visual Studio Editor";
+			var version = package?.version;
+			var status = string.IsNullOrEmpty(version)
+				? $"{displayName} enabled"
+				: $"{displayName} v{version} enabled";
 
 			var style = new GUIStyle
 			{
@@ -127,8 +143,14 @@ namespace Microsoft.Unity.VisualStudio.Editor
 				margin = new RectOffset(0, 4, 0, 0)
 			};
 
-			GUILayout.Label($"<size=10><color=grey>{package.displayName} v{package.version} enabled</color></size>", style);
+			GUILayout.Label($"<size=10><color=grey>{status}</color></size>", style);
 			GUILayout.EndHorizontal();
+
+#if UNITY_MSBUILD_ENABLED
+			EditorGUILayout.LabelField("Project generation is handled by Unity's MSBuild pipeline.");
+#else
+			if (!TryGetVisualStudioInstallationForPath(CodeEditor.CurrentEditorInstallation, true, out var installation))
+				return;
 
 			EditorGUILayout.LabelField("Generate .csproj files for:");
 			EditorGUI.indentLevel++;
@@ -142,8 +164,10 @@ namespace Microsoft.Unity.VisualStudio.Editor
 			SettingsButton(ProjectGenerationFlag.PlayerAssemblies, "Player projects", "For each player project generate an additional csproj with the name 'project-player.csproj'", installation);
 			RegenerateProjectFiles(installation);
 			EditorGUI.indentLevel--;
+#endif
 		}
 
+#if !UNITY_MSBUILD_ENABLED
 		private static void RegenerateProjectFiles(IVisualStudioInstallation installation)
 		{
 			var rect = EditorGUI.IndentedRect(EditorGUILayout.GetControlRect());
@@ -163,12 +187,17 @@ namespace Microsoft.Unity.VisualStudio.Editor
 			if (newValue != prevValue)
 				generator.AssemblyNameProvider.ToggleProjectGeneration(preference);
 		}
+#endif
 
 		public void SyncIfNeeded(string[] addedFiles, string[] deletedFiles, string[] movedFiles, string[] movedFromFiles, string[] importedFiles)
 		{
 			if (TryGetVisualStudioInstallationForPath(CodeEditor.CurrentEditorInstallation, true, out var installation))
 			{
+#if UNITY_MSBUILD_ENABLED
+				MSBuildProjectIntegration.Update(installation);
+#else
 				installation.ProjectGenerator.SyncIfNeeded(addedFiles.Union(deletedFiles).Union(movedFiles).Union(movedFromFiles), importedFiles);
+#endif
 			}
 
 			foreach (var file in importedFiles.Where(a => Path.GetExtension(a) == ".pdb"))
@@ -194,10 +223,32 @@ namespace Microsoft.Unity.VisualStudio.Editor
 		{
 			if (TryGetVisualStudioInstallationForPath(CodeEditor.CurrentEditorInstallation, true, out var installation))
 			{
+#if UNITY_MSBUILD_ENABLED
+				MSBuildProjectIntegration.Update(installation);
+#else
 				installation.ProjectGenerator.Sync();
+#endif
 			}
 		}
 
+#if UNITY_MSBUILD_ENABLED
+		private static bool IsSupportedPath(string path)
+		{
+			if (string.IsNullOrEmpty(path))
+				return true;
+
+			var extension = Path.GetExtension(path);
+			if (string.IsNullOrEmpty(extension))
+				return false;
+
+			var extensionWithoutDot = extension.TrimStart('.');
+			return extensionWithoutDot.Equals("dll", StringComparison.OrdinalIgnoreCase)
+				|| extensionWithoutDot.Equals("asmdef", StringComparison.OrdinalIgnoreCase)
+				|| extensionWithoutDot.Equals("additionalfile", StringComparison.OrdinalIgnoreCase)
+				|| EditorSettings.projectGenerationBuiltinExtensions.Contains(extensionWithoutDot, StringComparer.OrdinalIgnoreCase)
+				|| EditorSettings.projectGenerationUserExtensions.Contains(extensionWithoutDot, StringComparer.OrdinalIgnoreCase);
+		}
+#else
 		private static bool IsSupportedPath(string path, IGenerator generator)
 		{
 			// Path is empty with "Open C# Project", as we only want to open the solution without specific files
@@ -209,6 +260,7 @@ namespace Microsoft.Unity.VisualStudio.Editor
 			// asdmdef is mandatory included
 			return generator.IsSupportedFile(path);
 		}
+#endif
 
 		public bool OpenProject(string path, int line, int column)
 		{
@@ -219,6 +271,13 @@ namespace Microsoft.Unity.VisualStudio.Editor
 				return false;
 			}
 
+#if UNITY_MSBUILD_ENABLED
+			if (!IsSupportedPath(path))
+				return false;
+
+			MSBuildProjectIntegration.Update(installation);
+			return installation.Open(path, line, column, MSBuildProjectIntegration.SolutionFilePath);
+#else
 			var generator = installation.ProjectGenerator;
 			if (!IsSupportedPath(path, generator))
 				return false;
@@ -228,8 +287,10 @@ namespace Microsoft.Unity.VisualStudio.Editor
 
 			var solution = GetOrGenerateSolutionFile(generator);
 			return installation.Open(path, line, column, solution);
+#endif
 		}
 
+#if !UNITY_MSBUILD_ENABLED
 		private static bool OpenFromInstallation(IVisualStudioInstallation installation, string path, int line, int column)
 		{
 			var solution = installation.ProjectGenerator.SolutionFile();
@@ -301,5 +362,6 @@ namespace Microsoft.Unity.VisualStudio.Editor
 			generator.Sync();
 			return generator.SolutionFile();
 		}
+#endif
 	}
 }
