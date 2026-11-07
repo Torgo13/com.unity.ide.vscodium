@@ -4,6 +4,7 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+#if !UNITY_MSBUILD_ENABLED
 using SR = System.Reflection;
 
 using System.Collections.Generic;
@@ -25,3 +26,4 @@ namespace Microsoft.Unity.VisualStudio.Editor {
 	}
 
 }
+#endif

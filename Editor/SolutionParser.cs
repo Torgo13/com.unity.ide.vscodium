@@ -2,6 +2,7 @@
  *  Copyright (c) Microsoft Corporation. All rights reserved.
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
+#if !UNITY_MSBUILD_ENABLED
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -48,14 +49,18 @@ namespace Microsoft.Unity.VisualStudio.Editor
 
 			foreach (Match match in mc)
 			{
-				projects.Add(new SolutionProjectEntry
+				var project = new SolutionProjectEntry
 				{
 					ProjectFactoryGuid = match.Groups["projectFactoryGuid"].Value,
 					Name = match.Groups["name"].Value,
 					FileName = match.Groups["fileName"].Value,
 					ProjectGuid = match.Groups["projectGuid"].Value,
 					Metadata = match.Groups["metadata"].Value
-				});
+				};
+				if (!project.IsSolutionFolderProjectFactory() && FileUtility.IsMSBuildGeneratedProject(project.FileName))
+					continue;
+
+				projects.Add(project);
 			}
 
 			return projects.ToArray();
@@ -106,9 +111,13 @@ namespace Microsoft.Unity.VisualStudio.Editor
 
 			foreach (var project in document.Descendants("Project"))
 			{
+				var fileName = project.Attribute("Path")?.Value;
+				if (FileUtility.IsMSBuildGeneratedProject(fileName))
+					continue;
+
 				projects.Add(new SolutionProjectEntry
 				{
-					FileName = project.Attribute("Path")?.Value,
+					FileName = fileName,
 				});
 			}
 
@@ -116,3 +125,4 @@ namespace Microsoft.Unity.VisualStudio.Editor
 		}
 	}
 }
+#endif

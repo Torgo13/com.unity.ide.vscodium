@@ -1,4 +1,5 @@
-﻿using System;
+﻿#if !UNITY_MSBUILD_ENABLED
+using System;
 
 namespace Microsoft.Unity.VisualStudio.Editor
 {
@@ -14,3 +15,4 @@ namespace Microsoft.Unity.VisualStudio.Editor
 		}
 	}
 }
+#endif

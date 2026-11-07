@@ -17,7 +17,10 @@ namespace Microsoft.Unity.VisualStudio.Editor
 {
 	internal class VisualStudioCodeInstallation : VisualStudioInstallation
 	{
+		private const string MicrosoftUnityExtensionId = "visualstudiotoolsforunity.vstuc";
+#if !UNITY_MSBUILD_ENABLED
 		private static readonly IGenerator _generator = GeneratorFactory.GetInstance(GeneratorStyle.SDK);
+#endif
 
 		public override bool SupportsAnalyzers
 		{
@@ -27,6 +30,7 @@ namespace Microsoft.Unity.VisualStudio.Editor
 			}
 		}
 
+#if !UNITY_MSBUILD_ENABLED
 		public override Version LatestLanguageVersionSupported
 		{
 			get
@@ -34,6 +38,7 @@ namespace Microsoft.Unity.VisualStudio.Editor
 				return new Version(13, 0);
 			}
 		}
+#endif
 
 		private string GetExtensionPath()
 		{
@@ -56,6 +61,7 @@ namespace Microsoft.Unity.VisualStudio.Editor
 
 			return GetAnalyzers(vstuPath); }
 
+#if !UNITY_MSBUILD_ENABLED
 		public override IGenerator ProjectGenerator
 		{
 			get
@@ -63,6 +69,7 @@ namespace Microsoft.Unity.VisualStudio.Editor
 				return _generator;
 			}
 		}
+#endif
 
 		private static bool IsCandidateForDiscovery(string path)
 		{
@@ -429,7 +436,7 @@ namespace Microsoft.Unity.VisualStudio.Editor
         ""*.sln"": ""*.csproj"",
         ""*.slnx"": ""*.csproj""
     },
-    ""dotnet.defaultSolution"": """ + IOPath.GetFileName(ProjectGenerator.SolutionFile()) + @""",
+    ""dotnet.defaultSolution"": """ + DefaultSolutionFileName() + @""",
     ""dotnet.enableWorkspaceBasedDevelopment"": false
 }";
 
@@ -473,7 +480,7 @@ namespace Microsoft.Unity.VisualStudio.Editor
 
 				// Check default solution
 				var defaultSolution = settings[solutionKey];
-				var solutionFile = IOPath.GetFileName(ProjectGenerator.SolutionFile());
+				var solutionFile = DefaultSolutionFileName();
 				if (defaultSolution == null || defaultSolution.Value != solutionFile)
 				{
 					settings[solutionKey] = solutionFile;
@@ -494,7 +501,6 @@ namespace Microsoft.Unity.VisualStudio.Editor
 			}
 		}
 
-		private const string MicrosoftUnityExtensionId = "visualstudiotoolsforunity.vstuc";
 		private const string DefaultRecommendedExtensionsContent = @"{
     ""recommendations"": [
       """+ MicrosoftUnityExtensionId + @"""
@@ -553,6 +559,15 @@ namespace Microsoft.Unity.VisualStudio.Editor
 				// Keep formatting/indent in sync with default contents
 				sw.Write(node.ToString(aIndent: 4));
 			}
+		}
+
+		private static string DefaultSolutionFileName()
+		{
+#if UNITY_MSBUILD_ENABLED
+			return MSBuildProjectIntegration.SolutionFileName;
+#else
+			return IOPath.GetFileName(_generator.SolutionFile());
+#endif
 		}
 
 		public override bool Open(string path, int line, int column, string solution)

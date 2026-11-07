@@ -16,11 +16,11 @@
         {
             "name": "com.unity.test-framework",
             "expression": "",
-            "define": "INCLUDE_TEST_FRAMEWORK"
+            "define": "TEST_FRAMEWORK"
         },
         {
             "name": "Unity",
-            "expression": "6000.5.0a9",
+            "expression": "7000.0.0a6",
             "define": "LIFECYCLE_APIS_AVAILABLE"
         }
     ],

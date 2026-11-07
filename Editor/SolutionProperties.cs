@@ -2,6 +2,7 @@
  *  Copyright (c) Microsoft Corporation. All rights reserved.
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
+#if !UNITY_MSBUILD_ENABLED
 using System.Collections.Generic;
 
 namespace Microsoft.Unity.VisualStudio.Editor
@@ -13,3 +14,4 @@ namespace Microsoft.Unity.VisualStudio.Editor
 		public string Type { get; set; }
 	}
 }
+#endif

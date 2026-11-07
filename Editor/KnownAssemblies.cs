@@ -3,6 +3,7 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+#if !UNITY_MSBUILD_ENABLED
 namespace Microsoft.Unity.VisualStudio.Editor
 {
 	internal static class KnownAssemblies
@@ -12,3 +13,4 @@ namespace Microsoft.Unity.VisualStudio.Editor
 		public const string UnityVS = "UnityVS.VersionSpecific";
 	}
 }
+#endif

@@ -2,6 +2,8 @@
 
 To use the package, go to **Edit** > **Preferences** > **External Tools** > **External Script Editor** and select the version of **Visual Studio** you have installed. When you select this option, the window reloads and displays settings that control production of .csproj files.
 
+The generation settings below apply to Unity's regular compilation pipeline. If you enable Unity's MSBuild pipeline, see [MSBuild compilation](#msbuild-compilation).
+
 ![External Tools tab in the Preferences window](Images/vs-external-tools.png)
 
 ## Generate .csproj files
@@ -21,3 +23,11 @@ These settings control whether to generate .csproj files for any installed packa
 |       **Tarball packages** | Any package you install from a GZip tarball archive on the local machine, outside of your Unity project. |
 |       **Unknown packages** | Any package which Unity cannot determine an origin for. This could be because the package doesn’t list its origin, or that Unity doesn’t recognize the origin listed. |
 |       **Player projects** | For each player project, generate an additional .csproj file named ‘originalProjectName.Player.csproj’. This allows different project types to have their code included in Visual Studio’s systems, such as assembly definitions or testing suites. |
+
+## MSBuild compilation
+
+When `UNITY_MSBUILD_ENABLED` is defined, Unity owns the authoritative projects and solution. This package does not generate or post-process them, and the External Tools panel replaces the package-generation controls with an explanatory message.
+
+### IDE integration and extension files
+
+`Package.Build.props` and `Package.Build.targets`, beside `package.json`, are Unity-supported package extension points.

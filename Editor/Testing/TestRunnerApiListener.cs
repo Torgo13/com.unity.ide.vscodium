@@ -1,4 +1,4 @@
-﻿#if INCLUDE_TEST_FRAMEWORK
+#if TEST_FRAMEWORK
 using System;
 using UnityEditor;
 using UnityEditor.TestTools.TestRunner.Api;
@@ -54,4 +54,27 @@ namespace Microsoft.Unity.VisualStudio.Editor.Testing
 		}
 	}
 }
-#endif // INCLUDE_TEST_FRAMEWORK
+#else
+using UnityEngine;
+
+namespace Microsoft.Unity.VisualStudio.Editor.Testing
+{
+	// The Test Explorer integration is only available when the Test Framework package
+	// (com.unity.test-framework) is installed. This package does not depend on it so
+	// that projects which do not run tests are not forced to pull it in.
+	internal class TestRunnerApiListener
+	{
+		private const string TestFrameworkRequiredMessage = "The Test Framework package is required to run tests from Visual Studio. You can install it via the Package Manager.";
+
+		public static void RetrieveTestList(string mode)
+		{
+			Debug.LogError(TestFrameworkRequiredMessage);
+		}
+
+		public static void ExecuteTests(string command)
+		{
+			Debug.LogError(TestFrameworkRequiredMessage);
+		}
+	}
+}
+#endif
